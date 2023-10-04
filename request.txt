@@ -1,0 +1,7 @@
+imageio
+pandas
+numpy
+sklearn.model_selection
+sklearn.svm
+pip install scikit-learn
+PIL
