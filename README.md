@@ -1,85 +1,89 @@
-# Fire Detection program Based on Supervised ML Algorithm (SVM)
+# Fire Detection
 
-#### Video Demo: <URL [HERE](https://youtu.be/O89DcTeEPvo?feature=shared)>
-#### Description: This program can highlight the part of an image that contains the fire with an acceptable accuracy.
+[![CI](https://github.com/Yasaman-Honarparvar/Fire-detection/actions/workflows/ci.yml/badge.svg)](https://github.com/Yasaman-Honarparvar/Fire-detection/actions/workflows/ci.yml)
+[![Python](https://img.shields.io/badge/python-3.9%2B-blue)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+Pixel-wise fire detection in images using a supervised SVM classifier. Each
+pixel's RGB value is treated as a feature, so the model learns to tell "fire
+colored" pixels apart from everything else and highlights them in the output
+image.
+
+[Video walkthrough](https://youtu.be/O89DcTeEPvo?feature=shared)
+
+| Before | After |
+| --- | --- |
+| ![Before](docs/images/before_example.jpg) | ![After](docs/images/after_example.jpeg) |
+
+## How it works
+
+1. **Dataset construction** ([`fire_detection/dataset.py`](src/fire_detection/dataset.py)) — every pixel of the training images is
+   extracted as an `(R, G, B)` triple and labeled `1` (fire) or `2` (no fire),
+   producing one row per pixel.
+2. **Training** ([`fire_detection/model.py`](src/fire_detection/model.py)) — an SVM classifier is fit on the labeled pixels.
+   A linear kernel was found to generalize best:
+
+   | Kernel  | Test accuracy |
+   | ------- | -------------- |
+   | linear  | 89.90% |
+   | rbf     | 76.29% |
+   | sigmoid | 65.82% |
+
+3. **Prediction & highlighting** ([`fire_detection/visualize.py`](src/fire_detection/visualize.py)) — the trained model labels every
+   pixel of a new image, and pixels confidently predicted as fire are
+   recolored red in the output image.
+
 ## Installation
 
-Use the package manager [pip](https://pip.pypa.io/en/stable/) to install the necessary libraries to run the program. They are also mentioned in the [request.txt](request.txt).
+```bash
+git clone https://github.com/Yasaman-Honarparvar/Fire-detection.git
+cd Fire-detection
+pip install -e .
+```
+
+## Usage
+
+Run the full pipeline (build dataset → train → predict → highlight) on the
+bundled sample images:
 
 ```bash
-pip install imageio
-pip install pandas
-pip install numpy
-pip install sklearn.model_selection
-pip install sklearn.svm
-pip install scikit-learn
-pip install PIL
+fire-detect
 ```
-This program can detect the part of the image that contains the fire and highlight it in red color. For doing this job, some pictures that contain the fire and some that do not contain the fire are fed to the program, and some functions are designed that you can find in the following:
 
-## Image_to_dataset Function
-In the **image_to_dataset function**,  all of the images convert to the numerical dataset that indeed contains RGB pixels and all of them are labeled based on including fire or not. If the image contains fire, it will be labeled as **1** and also if the image does not contain fire, it will be labeled as  **2**.Images that contain fire are: [fire.jfif](fire.jfif),[fire_2.jpg](fire_2.jpg),[fire_3.jpg](fire_3.jpg) and images do not contain water are: [demo_2.jpg](demo_2.jpg),[river.jpg](river.jpg). All the process of reading images and converting them to the numerical dataset has been done by calling bellow functions that are embedded in the **image_to_dataset function**:
-* df_fire
-* df_nofire
-* image_to_numerical_rgb
+Or point it at your own images:
 
-As a result, image_dataset.txt is made as the result of this function.
-## Fire_detection Function
-After making datadset that its name is **image_dataset.txt** it is given to the next function that its name is **fire_detection**. It is a function that trains a dataset (image_dataset.txt) and gets an image ([firewater2.jpg](firewater2.jpg)) as input to predict the label of the image.The Machine learning algorithm that is used is SVM which is a supervised algorithm that is why images are labeled individually. The kernel is **linear** because other kernels including sigmoid and rbf have been tested and their accuracy on the test data has not been as much as linear accuracy.
+```bash
+fire-detect \
+  --fire-dir path/to/fire_images \
+  --no-fire-dir path/to/no_fire_images \
+  --image path/to/target.jpg \
+  --output-dir outputs
+```
 
-<style>
-img[src$="test_acc.png"] {
-  display: block;
-  margin:0 ;
-  border-radius: 5%;
-  max-width: 70%;
-}
-</style>
-<figure>
-    <img src="test_acc.png"
-         alt="test_accuracy" width=500 height=300>
-    <figcaption>The test accuracy</figcaption>
-</figure>
+Results are written to `outputs/`: the labeled pixel dataset
+(`image_dataset.csv`), the predictions for the target image
+(`pred_dataset.csv`), and the highlighted image.
 
+Run `fire-detect --help` for all options, including `--kernel` to try `rbf`
+or `sigmoid` instead of the default `linear`.
 
+## Development
 
-| Kernels      | Test Accuracy(%) |
-| ----------- | ----------- |
-| linear      | 89.90 |
-| sigmoid   | 65.82 |
-| rbf   | 76.29 |
+```bash
+pip install -e ".[dev]"
+pytest
+ruff check src tests
+```
 
+## Project layout
 
-The result of this prediction that results in labeling the image is saved in the **pred_dataset.txt**.
+```
+src/fire_detection/   # library code (dataset building, training, visualization, CLI)
+tests/                # pytest suite
+data/samples/         # example fire / no-fire / prediction images used by tests and the CLI default
+docs/images/          # static images used in this README
+```
 
-## Show_pred_fire Function
- It is a function that highlights the fire based on the trained dataset and saves the result into 'myimg.jpeg'.
-You can see the image before and after of fire detection below:
+## License
 
-<style>
-img[src$="firewater2.jpg"] {
-  display: block;
-  margin:l;
-  border-radius: 5%;
-  max-width: 100%;
-}
-</style>
-<figure>
-    <img src="firewater2.jpg"
-         alt="firewater2b" width=500 height=300>
-    <figcaption>The Image before the detection of the fire</figcaption>
-</figure>
-<style>
-img[src$="myimg.jpeg"] {
-  display: block;
-  margin:l;
-  border-radius: 5%;
-  max-width: 100%;
-}
-</style>
-<figure>
-    <img src="myimg.jpeg"
-         alt="firewater2a" width=500 height=300>
-    <figcaption>The image after the detection of the fire</figcaption>
-</figure>
-
+[MIT](LICENSE)
