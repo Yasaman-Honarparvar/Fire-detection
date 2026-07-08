@@ -15,10 +15,10 @@ image.
 
 ## How it works
 
-1. **Dataset construction** ([`fire_detection/dataset.py`](src/fire_detection/dataset.py)) — every pixel of the training images is
+1. **Dataset construction** ([`fire_detection/dataset.py`](src/fire_detection/dataset.py)): every pixel of the training images is
    extracted as an `(R, G, B)` triple and labeled `1` (fire) or `2` (no fire),
    producing one row per pixel.
-2. **Training** ([`fire_detection/model.py`](src/fire_detection/model.py)) — an SVM classifier is fit on the labeled pixels.
+2. **Training** ([`fire_detection/model.py`](src/fire_detection/model.py)): an SVM classifier is fit on the labeled pixels.
    With the bundled sample images, the rbf kernel generalizes best:
 
    | Kernel  | Test accuracy |
@@ -27,7 +27,9 @@ image.
    | rbf     | 96.14% |
    | sigmoid | 76.24% |
 
-3. **Prediction & highlighting** ([`fire_detection/visualize.py`](src/fire_detection/visualize.py)) — the trained model labels every
+   ![Test accuracy by kernel](docs/images/test_accuracy.png)
+
+3. **Prediction & highlighting** ([`fire_detection/visualize.py`](src/fire_detection/visualize.py)): the trained model labels every
    pixel of a new image, and pixels confidently predicted as fire are
    recolored red in the output image.
 
